@@ -43,7 +43,7 @@ const Index = () => {
 
   return (
     <MainLayout>
-      <Grid container justify="space-between">
+      <Grid container justify="center">
         <Card className={styles.card}>
           <Box p={3}>
             <Grid container justify="space-between">

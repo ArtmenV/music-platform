@@ -6,7 +6,7 @@ import { StepWrapper } from '../../../components/StepWrapper'
 import { MainLayout } from '../../../layouts/MainLayouts'
 import styles from './create.module.scss'
 
-const Index = () => {s
+const Index = () => {
   const [activeStep, setActiveStep] = React.useState(0)
   const [picture, setPicture] = React.useState(null)
   const [audio, setAudio] = React.useState(null)
