@@ -1,0 +1,27 @@
+.card {
+  margin: 20px;
+  padding: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  .track {
+    padding: 10px;
+    display: flex;
+    align-items: center;
+
+    .track__name {
+      width: 200px;
+      margin: 0 20px;
+
+      .track__artist {
+        color: grey;
+        font-size: 12px;
+      }
+    }
+  }
+
+  &__delete {
+    margin-left: auto;
+  }
+}
