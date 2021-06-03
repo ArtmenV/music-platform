@@ -1,41 +1,101 @@
 import { Pause, PlayArrow, VolumeUp } from '@material-ui/icons'
 import { Grid, IconButton } from '@material-ui/core'
-import React from 'react'
+import React, { useEffect } from 'react'
 import styles from './Player.module.scss'
 import { ITrack } from '../types.ts/track'
 import { TrackProgress } from './TrackProgress'
+import { useTypedSelector } from '../hook/useTypeSelector'
+import { useActions } from '../hook/useActions'
+import { playTrack, setVolume } from '../store/actions/player'
+
+let audio;
 
 export const Player = () => {
-  const active = false
-  const track: ITrack = {
-    _id: '3',
-    name: 'Трек 3',
-    artist: 'Испольнитель 3',
-    text: 'Какой-то текст',
-    listens: 2,
-    audio: 'http://localhost:5000/audio/c526352f-2df9-4036-b566-42e59f526ea4.mp3',
-    picture: 'http://localhost:5000/image/e931cbba-1f0f-42e4-8fb2-aa582c53ac0d.jpg',
-    comments: [],
+  const {
+    pause, 
+    volume,
+    active,
+    duration,
+    currentTime,
+  } = useTypedSelector(state => state.player)
+
+  const {
+    playTrack,
+    pauseTrack,
+    setVolume,
+    setCurrentTime,
+    setDuration,
+    setActiveTrack,
+  } = useActions()
+
+  useEffect(() => {
+    if (!audio) {
+      audio = new Audio()
+      return
+    }
+    
+    setAudio()
+    play()
+  }, [active])
+
+
+  const setAudio = () => {
+    if (active) {
+      audio.src = `http://localhost:5000/${active.audio}`
+      audio.volume = volume / 100
+
+      audio.onloadedmetadata = () => {
+        setDuration(Math.ceil(audio.duration))
+      }
+
+      audio.ontimeupdate = () => {
+        setCurrentTime(Math.ceil(audio.currentTime))
+      }
+    }
   }
+
+  const play = () => {
+    if (pause) {
+      playTrack()
+      audio.play();
+      return
+    }
+
+    audio.pause()
+    pauseTrack()
+  }
+
+  const changeVolume = (e: React.ChangeEvent<HTMLInputElement>) => {
+    audio.volume = Number(e.target.value) / 100
+    setVolume(Number(e.target.value))
+  }
+
+  const changeCurrentTime = (e: React.ChangeEvent<HTMLInputElement>) => {
+    audio.currentTime = Number(e.target.value)
+    setCurrentTime(Number(e.target.value))
+  }
+
+  if (!active) return null
+
   return (
     <div className={styles.player}>
-      <IconButton onClick={e => e.stopPropagation()}>
+      <IconButton onClick={play}>
         {
-          active 
+          !pause 
             ? <Pause /> 
             : <PlayArrow />
         }
       </IconButton>
 
-      <Grid 
+      <Grid
         xs={3}
         item
         container 
         direction="column"
         className={styles.track}
       >
-        <div>{track.name}</div>
-        <div className={styles.track__artist}>{track.artist}</div>
+        <div>{active?.name}</div>
+        <div className={styles.track__artist}>{active?.artist}</div>
       </Grid>
 
       <Grid
@@ -43,17 +103,17 @@ export const Player = () => {
         direction="row"
       >
         <TrackProgress 
-          left={0}
-          right={100}
-          onChange={() => ({})}
+          left={currentTime}
+          right={duration}
+          onChange={changeCurrentTime}
         />
         <VolumeUp style={{marginLeft: 'auto'}}/>
         <TrackProgress 
-          left={0}
+          left={volume}
           right={100}
-          onChange={() => ({})}
+          onChange={changeVolume}
         />
-      </Grid>
+      </Grid> 
     </div>
   )
 }

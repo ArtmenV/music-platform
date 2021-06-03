@@ -3,15 +3,26 @@ import React from 'react';
 import { Navbar } from '../components/Navbar';
 import { Player } from '../components/Player'
 import styles  from './MainLayouts.module.scss'
+import Head from 'next/head'
 
-export const MainLayout: React.FC = ({children}) => {
+interface MainLayoutProps {
+  title?: string
+}
+
+export const MainLayout: React.FC<MainLayoutProps> = ({
+  children,
+  title,
+}) => {
   return (
-    <div>
+    <>
+      <Head>
+        <title>{title || 'Музыкальная площадка'}</title>
+      </Head>
       <Navbar />
       <Container className={styles.container}>
         {children}
       </Container>
       <Player />
-    </div>
+    </>
   )
 }

@@ -3,6 +3,7 @@ import { Delete, Pause, PlayArrow } from '@material-ui/icons'
 import { useRouter } from 'next/router'
 import { Interface } from 'node:readline'
 import React from 'react'
+import { useActions } from '../hook/useActions'
 import { ITrack } from '../types.ts/track'
 import styles from './TrackItem.module.scss'
 
@@ -15,14 +16,25 @@ export const TrackItem: React.FC<TrackItemProps> = (
   {track, active = false}
 ) => {
   const router = useRouter()
-  
+  const {
+    playTrack,
+    pauseTrack,
+    setActiveTrack,
+  } = useActions()
+
+  const play = (e) => {
+    e.stopPropagation()
+    setActiveTrack(track)
+    playTrack()
+  }
+  console.log('treckItem', track.picture)
   return (
     <Card 
       className={styles.card}
       onClick={() => router.push(`/tracks/${track._id}`)}
     >
       <div className={styles.track}>
-        <IconButton onClick={e => e.stopPropagation()}>
+        <IconButton onClick={play}>
           {
             active 
               ? <Pause /> 
@@ -30,7 +42,7 @@ export const TrackItem: React.FC<TrackItemProps> = (
           }
         </IconButton>
         <img 
-          width={70} 
+          width={70}
           height={70} 
           src={track.picture}
           alt=""
