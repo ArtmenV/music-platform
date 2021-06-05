@@ -24,7 +24,7 @@ export const StepWrapper: React.FC<StepWrapperProps> = ({
         {steps.map((step, index) => (  
           <Step
             key={index}
-            completed={activeStep > index}
+            completed={activeStep >= index}
           >
             <StepLabel>
               {step}

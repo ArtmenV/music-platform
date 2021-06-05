@@ -1,26 +1,42 @@
 import { Button, Grid, TextField } from '@material-ui/core'
+import axios from 'axios'
+import { GetServerSideProps } from 'next'
 import { useRouter } from 'next/router'
-import React from 'react'
+import React, { useState } from 'react'
+import { useInput } from '../../hook/useInput'
 import { MainLayout } from '../../layouts/MainLayouts'
 import { ITrack } from '../../types.ts/track'
 import styles from './track.module.scss'
 
-const TrackPage = () => {
-  const track: ITrack = {
-    _id: '3',
-    name: 'Трек 3',
-    artist: 'Испольнитель 3',
-    text: 'Какой-то текст',
-    listens: 2,
-    audio: 'http://localhost:5000/audio/c526352f-2df9-4036-b566-42e59f526ea4.mp3',
-    picture: 'http://localhost:5000/image/e931cbba-1f0f-42e4-8fb2-aa582c53ac0d.jpg',
-    comments: [],
-  }
+const TrackPage = ({serverTrack}) => {
+  const [track, setTrack] = useState<ITrack>(serverTrack)
   const router = useRouter()
+  const username = useInput('')
+  const text = useInput('')
+
+  const addComment = async () => {
+    try {
+      const response = await axios.post('http://localhost:5000/tracks/comment', {
+        username: username.value,
+        text: text.value,
+        trackId: track._id
+      })
+      setTrack({
+        ...track,
+        comments: [...track.comments, response.data]
+      })
+    } catch (e) {
+      console.log('e', e)
+    }
+  }
 
   return (
-    <MainLayout>
+    <MainLayout 
+      title={`Музыкальная площадка - ${track.name} - ${track.artist}`}
+      keywords={`Музыкаб артисты, ${track.name}, ${track.artist}`}
+    >
       <Button
+        variant={'outlined'}
         className={styles.button}
         onClick={() => router.push('/tracks')}
       >
@@ -28,7 +44,7 @@ const TrackPage = () => {
       </Button>
       <Grid container className={styles.content}>
         <img 
-          src={track.picture} 
+          src={'http://localhost:5000/' + track.picture} 
           alt="track"
           width={200}
           height={200}
@@ -44,23 +60,25 @@ const TrackPage = () => {
       <h1>Комментарии</h1>
       <Grid container className={styles.container}>
         <TextField
+          {...username}
           className={styles.name}
           label="Ваше имя"
           fullWidth
           variant="outlined"
         />
-        <TextField 
+        <TextField
+          {...text}
           label="Комментарий"
           fullWidth
           multiline
           rows={4}
           variant="outlined"
         />
-        <Button>Отправить</Button>
+        <Button onClick={addComment}>Отправить</Button>
       </Grid>
       <div>
-        {track.comments.map((comment) => (
-          <div>
+        {track.comments.map((comment, index) => (
+          <div key={index}>
             <div>Автор - {comment.username}</div>
             <div>Комментарий - {comment.text}</div>
           </div>
@@ -71,3 +89,12 @@ const TrackPage = () => {
 }
 
 export default TrackPage
+
+export const getServerSideProps: GetServerSideProps = async ({ params }) => {
+  const response = await axios.get('http://localhost:5000/tracks/' + params.id)
+  return {
+    props: {
+      serverTrack: response.data
+    }
+  }
+}
